@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Display with Plot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-indigo-600 flex flex-col items-center justify-center h-screen">
+    <div class="flex flex-col items-center">
+        <div class="flex flex-col items-center">
+            <div class="w-40 h-40 bg-white rounded-full shadow-xl flex items-center justify-center mb-4">
+                <div class="text-6xl font-bold text-indigo-600">{{ temp_data['now'] }}°C</div>
+            </div>
+            <div class="text-2xl text-white font-semibold mb-4">الحرارة الان</div>
+            <div class="flex">
+                <button id="dayBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-l">
+                    يوم
+                </button>
+                <button id='weekBtn' class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4">
+                    اسبوع
+                </button>
+                <button id='monthBtn' class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-r">
+                    شهر
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Plot container -->
+    <div class="w-full px-4 py-2 bg-white ">
+        <canvas id="temperatureChart" width="400" height="150"></canvas>
+    </div>
+    <script>
+        // Sample temperature data for 12 hours
+        const temperatureData = {{ temp_data['daily_list'] }};
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '11:00', '10:00', '12:00'],
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: temperatureData,
+                    fill: true,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        // Sample temperature data for different time frames
+const dailyData = {{ temp_data['daily_list'] }}; // ... up to 24 values
+const weeklyData =  {{ temp_data['weekly_list'] }}; // one value for each day of the week
+const monthlyData =  {{ temp_data['monthly_list'] }}; // ... up to 30 or 31 values
+
+const dayHours = ['00:00','01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00']; // ... up to 24 labels
+const weekDays = ['الاحد', 'الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة','السبت'];
+const monthDays = Array.from({ length: 30 }, (_, i) => (i + 1).toString()); // Generate labels from 1 to 30
+
+// Function to update the chart
+function updateChart(chart, data, labels) {
+    chart.data.labels = labels;
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data = data;
+    });
+    chart.update();
+}
+
+// Event listeners for buttons
+document.getElementById('dayBtn').addEventListener('click', function() {
+    updateChart(temperatureChart, dailyData, dayHours);
+});
+document.getElementById('weekBtn').addEventListener('click', function() {
+    updateChart(temperatureChart, weeklyData, weekDays);
+});
+document.getElementById('monthBtn').addEventListener('click', function() {
+    updateChart(temperatureChart, monthlyData, monthDays);
+});
+
+    </script>
+</body>
+</html>
